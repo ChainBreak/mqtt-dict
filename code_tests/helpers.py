@@ -1,5 +1,6 @@
 import time
 import subprocess
+import threading
 
 class Broker():
     
@@ -30,7 +31,7 @@ class Broker():
 
 
 
-def wait_true(condition_func, timeout):
+def wait_true(condition_func, timeout=10):
     end_time = time.time() + timeout
 
     while time.time() < end_time:
@@ -44,5 +45,25 @@ def wait_true(condition_func, timeout):
     return condition_func()
 
 
-# def assert_topic_payload(mqtt_dict, topic, payload, timeout=10):
-#     end_time = time.time() + timeout
+
+
+class BackgroundRunner(threading.Thread):
+    def __init__(self,function):
+        super().__init__()
+        self.function = function
+        self.alive = True
+
+    def run(self):
+        while self.alive:
+            self.function()
+    
+    def __enter__(self):
+        self.start()
+        return self
+    def __exit__(self,*args,**kwargs):
+        self.alive = False
+        self.join()
+
+
+
+
