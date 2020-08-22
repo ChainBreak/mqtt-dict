@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
-
-if __name__ == "__main__":
-    print("hello there")
+# from clientdict import Dict
+from .exceptions import MissingPayloadError
+from .clientdict import Dict

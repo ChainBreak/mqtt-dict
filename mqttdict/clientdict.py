@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
+from .exceptions import MissingPayloadError
 
-class ClientDict():
+class Dict():
 
     def __init__(self,*args,**kwargs):
         print("init")
@@ -33,14 +34,18 @@ class ClientDict():
     def __getitem__(self,topic):
         #check if this topic has a payload
         if topic not in self.topic_payload_dict:
-
-            #if not then set a default one
+            
             self.topic_payload_dict[topic] = None
 
             #if the client is connected then subscribe to this topic
             if self.mqtt_client.is_connected:
                 self.mqtt_client.subscribe(topic, self.default_qos)
-                print("subscribe",topic)
+            
+            raise MissingPayloadError(f"The topic '{topic}' does not have a payload yet")
+
+        if self.topic_payload_dict[topic] == None:
+            raise MissingPayloadError(f"The topic '{topic}' does not have a payload yet")
+
         return self.topic_payload_dict[topic]
 
 
@@ -48,3 +53,5 @@ class ClientDict():
         print("publish")
         self.mqtt_client.publish(topic,payload=payload , qos=self.default_qos, retain=True)
         self.topic_payload_dict[topic] = payload
+
+

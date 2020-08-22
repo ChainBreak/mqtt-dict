@@ -3,11 +3,16 @@ A Python module that wraps a MQTT client into a magical dictionary!
 
 
 ```python
-import mqtt-dict
+import mqttdict
 
-d = mqtt-dict.ClientDict("mqtt.eclipse.org", 1883)
+d = mqttdict.Dict("mqtt.eclipse.org", 1883)
+
 
 while True:
-    if d["temperature"] > d["setpoint"]:
-        d["fan_request"] = True
+    try:
+        if d["temperature"] > d["setpoint"]:
+            d["fan_request"] = True
+    except MissingTopicError as e:
+        print(e)
+
 ```

@@ -1,0 +1,2 @@
+class MissingPayloadError(Exception):
+    pass

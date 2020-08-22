@@ -1,77 +1,50 @@
 import time
+import pytest
 import subprocess
-from mqttdict.clientdict import ClientDict
+from mqttdict import Dict, MissingPayloadError
+from helpers import Broker, wait_true
 
 host = "127.0.0.1"
 port = 1234
 
-class Broker():
-    
-    def __init__(self):
-        self.mosquitto_process = None
 
-    def on(self):
-        if self.mosquitto_process == None:
-            self.mosquitto_process = subprocess.Popen(["mosquitto","-v","-p",str(port)])
-
-    def off(self):
-        try:
-            
-            self.mosquitto_process.terminate() 
-            self.mosquitto_process = None
-            print("terminate")
-        except:
-            pass
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self,*args):
-        self.off()
-        print("exit")
-
-def wait(condition_func, timeout):
-    end_time = time.time() + timeout
-
-    while not condition_func() and time.time() < end_time:
-        time.sleep(0.05)
-    
-    return condition_func()
 
 def test_basic():
-    with Broker() as broker:
+    with Broker(port) as broker:
         broker.on()
 
-        c1 = ClientDict(host,port)
-        c2 = ClientDict(host,port)
+        c1 = Dict(host,port)
+        c2 = Dict(host,port)
 
-        assert wait( lambda: c1.mqtt_client.is_connected() , 10)
-        assert wait( lambda: c2.mqtt_client.is_connected() , 10)
-
-        assert c2["test"] == None
+        assert wait_true( lambda: c1.mqtt_client.is_connected() , 10)
+        assert wait_true( lambda: c2.mqtt_client.is_connected() , 10)
+        
+        with pytest.raises(MissingPayloadError):
+            c2["test"]
 
         c1["test"] = 1
         
-        assert wait(lambda: c2["test"] == b"1" , 10)
+        assert wait_true(lambda: c2["test"] == b"1" , 10)
    
 
 def test_subscribe_before_connect():
-    with Broker() as broker:
+    with Broker(port) as broker:
         
-        c1 = ClientDict(host,port)
-        c2 = ClientDict(host,port)
+        c1 = Dict(host,port)
+        c2 = Dict(host,port)
 
         assert not c1.mqtt_client.is_connected()
         assert not c2.mqtt_client.is_connected()
 
-        assert c2["test"] == None
+        with pytest.raises(MissingPayloadError):
+            c2["test"]
 
         broker.on()
 
-        assert wait( lambda: c1.mqtt_client.is_connected() , 10)
-        assert wait( lambda: c2.mqtt_client.is_connected() , 10)
+        assert wait_true( lambda: c1.mqtt_client.is_connected() , 10)
+        assert wait_true( lambda: c2.mqtt_client.is_connected() , 10)
         
         c1["test"] = 1
    
-        assert wait(lambda: c2["test"] == b"1" , 10)
+        assert wait_true(lambda: c2["test"] == b"1" , 10)
 
