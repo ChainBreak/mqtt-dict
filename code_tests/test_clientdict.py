@@ -1,7 +1,7 @@
 import time
 import pytest
 import subprocess
-from mqttdict import Dict, MissingPayloadError
+from mqttdict import MqttDict, MissingPayloadError
 from helpers import Broker, wait_true, BackgroundRunner
 
 host = "127.0.0.1"
@@ -13,8 +13,8 @@ def test_basic():
     with Broker(port) as broker:
         broker.on()
 
-        c1 = Dict(host,port)
-        c2 = Dict(host,port)
+        c1 = MqttDict(host,port)
+        c2 = MqttDict(host,port)
 
         assert wait_true( lambda: c1.mqtt_client.is_connected() , 10)
         assert wait_true( lambda: c2.mqtt_client.is_connected() , 10)
@@ -30,8 +30,8 @@ def test_basic():
 def test_subscribe_before_connect():
     with Broker(port) as broker:
         
-        c1 = Dict(host,port)
-        c2 = Dict(host,port)
+        c1 = MqttDict(host,port)
+        c2 = MqttDict(host,port)
 
         assert not c1.mqtt_client.is_connected()
         assert not c2.mqtt_client.is_connected()
@@ -53,8 +53,8 @@ def test_subscribe_before_connect():
 
 def test_temperature_example():
 
-    d1 = Dict(host,port)
-    d2 = Dict(host,port)
+    d1 = MqttDict(host,port)
+    d2 = MqttDict(host,port)
 
     def rules():
         try:

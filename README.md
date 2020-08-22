@@ -5,7 +5,7 @@ A Python module that wraps a MQTT client into a magical dictionary!
 import time
 import mqttdict
 
-d = mqttdict.Dict("mqtt.eclipse.org", 1883)
+d = mqttdict.MqttDict("mqtt.eclipse.org", 1883)
 
 while True:
     try:

@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 from .exceptions import MissingPayloadError
 
-class Dict():
+class MqttDict():
 
     def __init__(self,*args,**kwargs):
         print("init")
