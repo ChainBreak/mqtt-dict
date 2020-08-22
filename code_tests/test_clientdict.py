@@ -5,7 +5,7 @@ from mqttdict import MqttDict, MissingPayloadError
 from helpers import Broker, wait_true, BackgroundRunner
 
 host = "127.0.0.1"
-port = 1234
+port = 1235
 
 
 
@@ -47,6 +47,25 @@ def test_subscribe_before_connect():
         c1["test"] = 1
    
         assert wait_true(lambda: c2["test"] == b"1" , 10)
+
+
+def test_retain():
+    with Broker(port) as broker:
+        broker.on()
+
+        d1 = MqttDict(host,port)
+        d2 = MqttDict(host,port)
+
+        assert wait_true( lambda: d1.mqtt_client.is_connected() , 10)
+        assert wait_true( lambda: d2.mqtt_client.is_connected() , 10)
+
+        d1["reatain_test"] = 1
+
+        assert wait_true( lambda: d2["reatain_test"] == b"1" , 10)
+
+        d3 = MqttDict(host,port)
+        assert wait_true( lambda: d3.mqtt_client.is_connected() , 10)
+        assert wait_true( lambda: d3["reatain_test"] == b"1" , 10)
 
 
 
